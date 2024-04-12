@@ -23,8 +23,8 @@ class MnistDataModule(pl.LightningDataModule):
             root=self.data_dir,
             train=True,
             transform=transforms.Compose([
-                transforms.RandomVerticalFlip(),
-                transforms.RandomHorizontalFlip(),
+                # transforms.RandomVerticalFlip(),
+                # transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
             ]),
             download=False,)
