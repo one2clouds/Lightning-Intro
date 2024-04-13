@@ -29,8 +29,20 @@ class NN(pl.LightningModule):
         x = self.fc2(x)
         return x 
     
-    def training_step(self,):
-        return 
+    def training_step(self, batch, batch_idx):
+        x,y = batch 
+        loss, scores, y = self._common_step(batch,batch_idx)
+
+        self.log_dict({
+            "train_loss": loss,
+            }, on_step=False,
+            on_epoch=True, prog_bar=True)
+        if batch_idx %100 ==0:
+            x = x[:8]
+            grid = torchvision.utils.make_grid(x.view(-1,1,28,28))
+            self.logger.experiment.add_image("mnist_images", grid, self.global_step)
+
+        return {"loss": loss, "scores": scores, "y": y} 
     
     def validation_step(self,):
         return 
