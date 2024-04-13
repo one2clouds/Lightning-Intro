@@ -44,6 +44,19 @@ class NN(pl.LightningModule):
 
         return {"loss": loss, "scores": scores, "y": y} 
     
+    def training_epoch_end(self,outputs):
+        scores = torch.cat([x["scores"] for x in outputs])
+        y = torch.cat([x["y"] for x in outputs])
+        self.log_dict(
+            {
+                "train_acc": self.accuracy(scores, y),
+                "train_f1": self.f1_score(scores, y),
+            },
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+        )
+
     def validation_step(self,):
         return 
     

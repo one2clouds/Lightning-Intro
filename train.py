@@ -39,6 +39,6 @@ if __name__ == "__main__":
         precision=config.PRECISION,
         callbacks=[MyPrintingCallback(), EarlyStopping(monitor="val_loss")],
     )
-    trainer.fit(model, dim)
+    trainer.fit(model, dm)
     trainer.validate(model,dm)
     trainer.test(model,dm)
