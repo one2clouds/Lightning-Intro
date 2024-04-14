@@ -57,28 +57,32 @@ class NN(pl.LightningModule):
             prog_bar=True,
         )
 
-    def validation_step(self,):
+    def validation_step(self,batch,batch_idx):
         loss, scores, y = self._common_step(batch, batch_idx)
         self.log("val_loss", loss)
         return loss 
     
-    def test_step(self,):
+    def test_step(self,batch,batch_idx):
         loss, scores, y = self._common_step(batch, batch_idx)
         self.log("test_loss", loss)
         return loss
     
-    def _common_step(self,):
+    def _common_step(self,batch,batch_idx):
         x, y = batch
         x = x.reshape(x.size(0), -1)
         scores = self.forward(x)
         loss = self.loss_fn(scores, y)
         return loss, scores, y
 
-    def predict_step(self,):
-        return 
+    def predict_step(self,batch,batch_idx):
+        x, y = batch
+        x = x.reshape(x.size(0), -1)
+        scores = self.forward(x)
+        preds = torch.argmax(scores, dim=1)
+        return preds 
     
     def configure_optimizers(self,):
-        return 
+        return optim.Adam(self.parameters(), lr=self.lr) 
 
 
 
