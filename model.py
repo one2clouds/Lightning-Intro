@@ -58,13 +58,21 @@ class NN(pl.LightningModule):
         )
 
     def validation_step(self,):
-        return 
+        loss, scores, y = self._common_step(batch, batch_idx)
+        self.log("val_loss", loss)
+        return loss 
     
     def test_step(self,):
-        return
+        loss, scores, y = self._common_step(batch, batch_idx)
+        self.log("test_loss", loss)
+        return loss
     
     def _common_step(self,):
-        return
+        x, y = batch
+        x = x.reshape(x.size(0), -1)
+        scores = self.forward(x)
+        loss = self.loss_fn(scores, y)
+        return loss, scores, y
 
     def predict_step(self,):
         return 
