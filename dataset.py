@@ -4,9 +4,6 @@ from torch.utils.data import DataLoader, random_split
 import torchvision.transforms as transforms
 
 
-
-
-
 class MnistDataModule(pl.LightningDataModule):
     def __init__(self, data_dir, batch_size, num_workers):
         super().__init__()
