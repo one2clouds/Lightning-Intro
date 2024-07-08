@@ -1,13 +1,15 @@
 from os import path
 from typing import Optional
 
-import torch
+import torch, torch.nn as nn, torch.utils.data as data, torchvision as tv, torch.nn.functional as F
 from lightning.pytorch import LightningDataModule, LightningModule, cli_lightning_logo
 from lightning.pytorch.cli import LightningCLI
 from lightning.pytorch.demos.mnist_datamodule import MNIST
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
+import lightning
+
 
 DATASETS_PATH = path.join(path.dirname(__file__), "Datasets")
 
@@ -79,46 +81,17 @@ class LitClassifier(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
 
-class MyDataModule(LightningDataModule):
-    def __init__(self, batch_size: int = 32):
-        super().__init__()
-        dataset = MNIST(DATASETS_PATH, train=True, download=True, transform=transforms.ToTensor())
-        self.mnist_test = MNIST(DATASETS_PATH, train=False, download=True, transform=transforms.ToTensor())
-        self.mnist_train, self.mnist_val = random_split(
-            dataset, [55000, 5000], generator=torch.Generator().manual_seed(42)
-        )
-        self.batch_size = batch_size
+dataset = MNIST(DATASETS_PATH, train=True, download=True, transform=transforms.ToTensor())
+mnist_test = MNIST(DATASETS_PATH, train=False, download=True, transform=transforms.ToTensor())
+mnist_train, mnist_val = random_split(
+    dataset, [55000, 5000], generator=torch.Generator().manual_seed(42)
+)
+batch_size = 2056
 
-    def train_dataloader(self):
-        return DataLoader(self.mnist_train, batch_size=self.batch_size)
-
-    def val_dataloader(self):
-        return DataLoader(self.mnist_val, batch_size=self.batch_size)
-
-    def test_dataloader(self):
-        return DataLoader(self.mnist_test, batch_size=self.batch_size)
-
-    def predict_dataloader(self):
-        return DataLoader(self.mnist_test, batch_size=self.batch_size)
-
-
-def cli_main():
-    cli = LightningCLI(
-        LitClassifier, MyDataModule, seed_everything_default=1234, save_config_kwargs={"overwrite": True}, run=False
-    )
-    cli.trainer.fit(cli.model, datamodule=cli.datamodule)
-    cli.trainer.test(ckpt_path="best", datamodule=cli.datamodule)
-    predictions = cli.trainer.predict(ckpt_path="best", datamodule=cli.datamodule)
-    print(predictions[0])
 
 
 if __name__ == "__main__":
-    print(DATASETS_PATH)
-    cli_lightning_logo()
-    cli_main()
 
-
-
-
-main problem batch size not defined
-use train2.py 
+    lit_classifier = LitClassifier()
+    trainer = lightning.Trainer(max_epochs=10)
+    trainer.fit(lit_classifier,data.DataLoader(mnist_train, num_workers=4), data.DataLoader(mnist_val, num_workers=4) )
